@@ -45,7 +45,7 @@ all: lib6k14-phony 6k14-phony
 .PHONY: lib6k14-phony lib6k14-log
 lib6k14-phony: lib6k14-log $(SHARED_LIB_NAME)
 
-lib6k14-long:
+lib6k14-log:
 	@echo Building shared library $(SHARED_LIB_NAME)
 
 .PHONY: 6k14-phony 6k14-log
