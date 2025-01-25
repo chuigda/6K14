@@ -1,0 +1,11 @@
+.vscode
+
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.core
+6k14
+vgcore*
+core*
