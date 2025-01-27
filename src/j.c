@@ -1,5 +1,11 @@
 #include "j.h"
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include "map.h"
+
 char const* pl9_ExplainGreek(PL9Greek greek) {
     static const char* greeks[] = {
         "α", "β", "γ", "δ", "ε",
@@ -41,9 +47,26 @@ typedef struct stPL9TypeEnv {
     TypeEnvGlobal *glob;
 
     PL9TypeEnvKind k;
-    PL9TypeEnvHint hint;
+    bool sized;
 
     TypeListNode_TypeVar *nglist;
     TypeListNode_TypeVar *nglast;
     void *vars;
 } PL9TypeEnv;
+
+PL9TypeEnv *pl9_MakeTypeEnv(PL9TypeEnvKind k, size_t szHint) {
+    PL9TypeEnv *ret = malloc(sizeof(PL9TypeEnv));
+    ret->parent = NULL;
+    ret->glob = malloc(sizeof(TypeEnvGlobal));
+    memset(ret->glob, 0, sizeof(TypeEnvGlobal));
+    ret->k = k;
+    ret->sized = szHint != SIZE_MAX;
+    ret->nglist = NULL;
+    ret->nglast = NULL;
+    if (szHint != SIZE_MAX) {
+        ret->vars = MakeVecMap(szHint);
+    } else {
+        ret->vars = MakeHashMap();
+    }
+    return ret;
+}
