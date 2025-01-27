@@ -1,5 +1,6 @@
 #include "j.h"
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -54,11 +55,30 @@ typedef struct stPL9TypeEnv {
     void *vars;
 } PL9TypeEnv;
 
+static PL9TypeEnv *MakeTypeEnvWithoutGlobal(PL9TypeEnvKind k, size_t szHint);
+static PL9TypeOp *MakeTypeOpUninit(PL9TypeEnv *env,
+                                   PL9TypeOperator op,
+                                   uint32_t argc);
+static void EnqueueGlobalTypeList(PL9TypeEnv *env, TypeListNode *node);
+
 PL9TypeEnv *pl9_MakeTypeEnv(PL9TypeEnvKind k, size_t szHint) {
-    PL9TypeEnv *ret = malloc(sizeof(PL9TypeEnv));
-    ret->parent = NULL;
+    PL9TypeEnv *ret = MakeTypeEnvWithoutGlobal(k, szHint);
     ret->glob = malloc(sizeof(TypeEnvGlobal));
     memset(ret->glob, 0, sizeof(TypeEnvGlobal));
+    return ret;
+}
+
+PL9TypeEnv *pl9_DeriveTypeEnv(PL9TypeEnv *env, PL9TypeEnvKind k, size_t szHint) {
+    PL9TypeEnv *ret = MakeTypeEnvWithoutGlobal(k, szHint);
+    ret->parent = env;
+    ret->glob = env->glob;
+    return ret;
+}
+
+static PL9TypeEnv *MakeTypeEnvWithoutGlobal(PL9TypeEnvKind k, size_t szHint) {
+    PL9TypeEnv *ret = malloc(sizeof(PL9TypeEnv));
+    ret->parent = NULL;
+    ret->glob = NULL;
     ret->k = k;
     ret->sized = szHint != SIZE_MAX;
     ret->nglist = NULL;
@@ -69,4 +89,90 @@ PL9TypeEnv *pl9_MakeTypeEnv(PL9TypeEnvKind k, size_t szHint) {
         ret->vars = MakeHashMap();
     }
     return ret;
+}
+
+void pl9_FreeTypeEnv(PL9TypeEnv *env) {
+    if (!env->parent) {
+        for (TypeListNode *iter = env->glob->tlist; iter;) {
+            TypeListNode *next = iter->next;
+            free(iter);
+            iter = next;
+        }
+    }
+
+    if (env->sized) {
+        FreeVecMap(env->vars, free);
+    } else {
+        FreeHashMap(env->vars, free);
+    }
+}
+
+PL9TypeVar *pl9_FreshTypeVar(PL9TypeEnv *env, PL9Greek greek) {
+    TypeListNode_TypeVar *node = malloc(sizeof(TypeListNode_TypeVar));
+    node->next = NULL;
+    if (env->glob->tlist) {
+        env->glob->tlast->next = (TypeListNode*) node;
+        env->glob->tlast = (TypeListNode*) node;
+    } else {
+        env->glob->tlist = (TypeListNode*) node;
+        env->glob->tlast = (TypeListNode*) node;
+    }
+
+    PL9TypeVar *ret = &node->ty;
+    ret->greek = greek;
+    ret->tstamp = env->glob->tstamps[greek]++;
+    ret->resolv = NULL;
+    return ret;
+}
+
+PL9TypeOp *pl9_MakeTypeOp(PL9TypeEnv *env, PL9TypeOperator op, uint32_t argc) {
+    PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
+    memset(ret->args, 0, argc * sizeof(PL9Type*));
+    return ret;
+}
+
+PL9TypeOp *pl9_MakeTypeOpL(PL9TypeEnv *env,
+                           PL9TypeOperator op,
+                           uint32_t argc,
+                           ...) {
+    PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
+    va_list ap;
+    va_start(ap, argc);
+    for (uint32_t i = 0; i < argc; i++) {
+        ret->args[i] = va_arg(ap, PL9Type*);
+    }
+    va_end(ap);
+    return ret;
+}
+
+PL9TypeOp *pl9_MakeTypeOpV(PL9TypeEnv *env,
+                           PL9TypeOperator op,
+                           uint32_t argc,
+                           PL9Type **args) {
+    PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
+    memcpy(ret->args, args, argc * sizeof(PL9Type*));
+    return ret;
+}
+
+static PL9TypeOp *MakeTypeOpUninit(PL9TypeEnv *env,
+                                   PL9TypeOperator op,
+                                   uint32_t argc) {
+    TypeListNode_TypeOp *node =
+        malloc(sizeof(TypeListNode_TypeOp) + argc * sizeof(PL9Type*));
+    node->next = NULL;
+    EnqueueGlobalTypeList(env, (TypeListNode*) node);
+
+    PL9TypeOp *ret = &node->ty;
+    ret->op = op;
+    return ret;
+}
+
+static void EnqueueGlobalTypeList(PL9TypeEnv *env, TypeListNode *node) {
+    if (env->glob->tlist) {
+        env->glob->tlast->next = node;
+        env->glob->tlast = node;
+    } else {
+        env->glob->tlist = node;
+        env->glob->tlast = node;
+    }
 }

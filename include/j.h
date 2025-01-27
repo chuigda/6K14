@@ -76,10 +76,16 @@ PL9TypeEnv *pl9_DeriveTypeEnv(PL9TypeEnv *env,
                               size_t szHint);
 void pl9_FreeTypeEnv(PL9TypeEnv *env);
 
-PL9TypeVar *pl9_FreshTypeVar(PL9Greek greek);
-PL9TypeOp *pl9_MakeTypeOp(PL9TypeOperator op, uint32_t argc);
-PL9TypeOp *pl9_MakeTypeOpL(PL9TypeOperator op, uint32_t argc, ...);
-PL9TypeOp *pl9_MakeTypeOpV(PL9TypeOperator op, uint32_t argc, PL9Type *args[]);
+PL9TypeVar *pl9_FreshTypeVar(PL9TypeEnv *env, PL9Greek greek);
+PL9TypeOp *pl9_MakeTypeOp(PL9TypeEnv *env,PL9TypeOperator op, uint32_t argc);
+PL9TypeOp *pl9_MakeTypeOpL(PL9TypeEnv *env,
+                           PL9TypeOperator op,
+                           uint32_t argc,
+                           ...);
+PL9TypeOp *pl9_MakeTypeOpV(PL9TypeEnv *env,
+                           PL9TypeOperator op,
+                           uint32_t argc,
+                           PL9Type *args[]);
 bool pl9_DefVar(PL9TypeEnv *env, char const *var, PL9Type *ty);
 
 int pl9_TypePrintf(FILE *fp, PL9Type *ty);
