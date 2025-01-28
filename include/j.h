@@ -23,6 +23,8 @@ PL9TypeEnv *pl9_DeriveTypeEnv(PL9TypeEnv *env,
                               size_t szHint);
 void pl9_FreeTypeEnv(PL9TypeEnv *env);
 
+void pl9_Infer(PL9TypeEnv *env, PL9Program *program);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
