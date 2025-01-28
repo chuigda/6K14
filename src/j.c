@@ -39,6 +39,19 @@ typedef struct stPL9TypeEnv {
     void *vars;
 } PL9TypeEnv;
 
+static PL9TypeVar *FreshTypeVar(PL9TypeEnv *env, PL9Greek greek);
+static PL9TypeOp *MakeTypeOp(PL9TypeEnv *env,
+                             PL9TypeOperator op,
+                             uint32_t argc);
+static PL9TypeOp *MakeTypeOpL(PL9TypeEnv *env,
+                              PL9TypeOperator op,
+                              uint32_t argc,
+                              ...);
+static PL9TypeOp *MakeTypeOpV(PL9TypeEnv *env,
+                                  PL9TypeOperator op,
+                                  uint32_t argc,
+                                  PL9Type *args[]);
+static bool DefVar(PL9TypeEnv *env, char const *var, PL9Type *ty);
 static PL9TypeEnv *MakeTypeEnvWithoutGlobal(PL9TypeEnvKind k, size_t szHint);
 static PL9TypeOp *MakeTypeOpUninit(PL9TypeEnv *env,
                                    PL9TypeOperator op,
@@ -91,7 +104,7 @@ void pl9_FreeTypeEnv(PL9TypeEnv *env) {
     }
 }
 
-PL9TypeVar *pl9_FreshTypeVar(PL9TypeEnv *env, PL9Greek greek) {
+PL9TypeVar *FreshTypeVar(PL9TypeEnv *env, PL9Greek greek) {
     TypeListNode_TypeVar *node = malloc(sizeof(TypeListNode_TypeVar));
     node->next = NULL;
     if (env->glob->tlist) {
@@ -109,16 +122,18 @@ PL9TypeVar *pl9_FreshTypeVar(PL9TypeEnv *env, PL9Greek greek) {
     return ret;
 }
 
-PL9TypeOp *pl9_MakeTypeOp(PL9TypeEnv *env, PL9TypeOperator op, uint32_t argc) {
+static PL9TypeOp *MakeTypeOp(PL9TypeEnv *env,
+                             PL9TypeOperator op,
+                             uint32_t argc) {
     PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
     memset(ret->args, 0, argc * sizeof(PL9Type*));
     return ret;
 }
 
-PL9TypeOp *pl9_MakeTypeOpL(PL9TypeEnv *env,
-                           PL9TypeOperator op,
-                           uint32_t argc,
-                           ...) {
+static PL9TypeOp *MakeTypeOpL(PL9TypeEnv *env,
+                              PL9TypeOperator op,
+                              uint32_t argc,
+                              ...) {
     PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
     va_list ap;
     va_start(ap, argc);
@@ -129,10 +144,10 @@ PL9TypeOp *pl9_MakeTypeOpL(PL9TypeEnv *env,
     return ret;
 }
 
-PL9TypeOp *pl9_MakeTypeOpV(PL9TypeEnv *env,
-                           PL9TypeOperator op,
-                           uint32_t argc,
-                           PL9Type **args) {
+static PL9TypeOp *MakeTypeOpV(PL9TypeEnv *env,
+                              PL9TypeOperator op,
+                              uint32_t argc,
+                              PL9Type **args) {
     PL9TypeOp *ret = MakeTypeOpUninit(env, op, argc);
     memcpy(ret->args, args, argc * sizeof(PL9Type*));
     return ret;
