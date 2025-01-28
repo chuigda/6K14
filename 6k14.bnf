@@ -1,0 +1,107 @@
+program ::= decl-list
+
+decl-list ::= decl-list decl
+            | ;
+
+decl ::= let-decl
+
+(*
+第一版先不做这玩意
+
+decl ::= data-decl | let-decl
+*)
+
+let-decl ::= 'let' IDENT = expr
+           | 'let' 'native'? IDENT '::' type
+
+type ::= type-var
+       | type-operator '<' type-list '>'
+       | '()'
+       | '(' type-list ')' '->' type
+
+type-list ::= type-list ',' type
+            | type
+            | ;
+
+expr ::= let-in-expr
+       | abs-expr
+       | if-expr
+       | loop-expr
+       | break-expr
+       | continue-expr
+       | return-expr
+       | assign-expr
+
+let-in-expr ::= 'let' 'rec'? bind-list 'in' expr
+
+abs-expr ::= '\\' ident-list '->' expr
+
+if-expr ::= 'if' expr 'then' expr 'else' expr
+
+loop-expr ::= 'loop' expr
+
+break-expr ::= 'break' expr?
+
+continue-expr ::= 'continue'
+
+return-expr ::= 'return' expr?
+
+bind-list ::= bind-list ',' bind
+            | bind
+
+bind ::= IDENT type-annotation? '=' expr
+
+type-annotation ::= '::' type
+
+assign-expr ::= IDENT ':=' binary-expr
+              | binary-expr
+
+binary-expr ::= binary-expr 'and' rel-expr
+              | binary-expr 'or' rel-expr
+              | rel-expr
+
+rel-expr ::= rel-expr '<' add-expr
+           | rel-expr '>' add-expr
+           | rel-expr '<=' add-expr
+           | rel-expr '>=' add-expr
+           | rel-expr '==' add-expr
+           | rel-expr '!=' add-expr
+           | rel-expr 'is' add-expr
+           | rel-expr 'is' 'not' add-expr
+           | add-expr
+
+add-expr ::= add-expr '+' mul-expr
+           | add-expr '-' mul-expr
+           | mul-expr
+
+mul-expr ::= mul-expr '*' unary-expr
+           | mul-expr '/' unary-expr
+           | unary-expr
+
+unary-expr ::= '~' unary-expr
+             | '!' unary-expr
+             | postfix-expr
+
+postfix-expr ::= primary-expr
+               | postfix-expr '[' expr ']'
+               | postfix-expr '(' arg-list ')'
+
+arg-list ::= arg-list ',' expr
+           | expr
+           | ;
+
+primary-expr ::= IDENT
+               | INT
+               | FLOAT
+               | STRING
+               | 'true'
+               | 'false'
+               | 'nil'
+               | '(' expr-list ')'
+
+expr-list ::= expr-list ';' expr
+            | expr
+
+ident-list ::= ident-list ',' IDENT
+             | IDENT
+             | ;
