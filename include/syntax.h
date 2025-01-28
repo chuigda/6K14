@@ -2,6 +2,7 @@
 #define P6K14_SYNTAX_H
 
 #include "lex.h"
+#include "type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -117,8 +118,6 @@ struct stPL9FuncTypeNode {
     PL9Token arrow;
     PL9TypeNode *tret;
 };
-
-typedef struct stPL9TypeBase PL9Type;
 
 #define PL9_EXPR_NODE_COMMON \
     PL9_SYNTAX_NODE_COMMON \
