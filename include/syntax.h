@@ -118,6 +118,136 @@ struct stPL9FuncTypeNode {
     PL9TypeNode *tret;
 };
 
+typedef struct stPL9TypeBase PL9Type;
+
+#define PL9_EXPR_NODE_COMMON \
+    PL9_SYNTAX_NODE_COMMON \
+    PL9Type *infer;
+
+struct stPL9ExprNode {
+    PL9_EXPR_NODE_COMMON
+};
+
+typedef struct stPL9BindingNode {
+    struct stPL9BindingNode *next;
+
+    PL9Token ident;
+    PL9Token dcolon;
+    PL9TypeNode *tnode;
+    PL9Token eq;
+    PL9ExprNode *expr;
+} PL9BindingNode;
+
+struct stPL9LetInNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token let;
+    PL9Token rec;
+    PL9BindingNode *bdlist;
+    PL9Token in;
+    PL9ExprNode *expr;
+};
+
+typedef struct stPL9FnArgNode {
+    struct stPL9FnArgNode *next;
+
+    PL9Token ident;
+    PL9Token dcolon;
+    PL9TypeNode *tnode;
+} PL9FnArgNode;
+
+struct stPL9AbsNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token lambda;
+    PL9FnArgNode *arglist;
+    PL9Token arrow;
+    PL9ExprNode *expr;
+};
+
+struct stPL9IfNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token iftok;
+    PL9ExprNode *e1;
+    PL9Token thentok;
+    PL9ExprNode *e2;
+    PL9Token elsetok;
+    PL9ExprNode *e3;
+};
+
+struct stPL9LoopNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token looptok;
+    PL9ExprNode *expr;
+};
+
+struct stPL9BreakNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token breaktok;
+    PL9ExprNode *expr;
+};
+
+struct stPL9ContinueNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token continuetok;
+};
+
+struct stPL9ReturnNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token returntok;
+    PL9ExprNode *expr;
+};
+
+struct stPL9AssignNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token ident;
+    PL9Token coloneq;
+    PL9ExprNode *expr;
+};
+
+struct stPL9BinaryNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token op;
+    PL9ExprNode *e1;
+    PL9ExprNode *e2;
+};
+
+struct stPL9UnaryNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token op;
+    PL9ExprNode *expr;
+};
+
+struct stPL9CallNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9ExprNode *fn;
+    PL9ExprNode *args;
+};
+
+struct stPL9IdentNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token ident;
+};
+
+struct stPL9LiteralNode {
+    PL9_EXPR_NODE_COMMON
+
+    PL9Token lit;
+};
+
+PL9Program *pl9_ParseProgram(PL9Token *toks);
+void pl9_FreeProgram(PL9Program *prog);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
