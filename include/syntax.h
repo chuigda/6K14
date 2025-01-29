@@ -1,6 +1,7 @@
 #ifndef P6K14_SYNTAX_H
 #define P6K14_SYNTAX_H
 
+#include "diag.h"
 #include "lex.h"
 #include "type.h"
 
@@ -244,7 +245,7 @@ struct stPL9LiteralNode {
     PL9Token lit;
 };
 
-PL9Program *pl9_ParseProgram(PL9Token *toks);
+PL9Program *pl9_ParseProgram(PL9Token *toks, PL9DiagContext *diagctx);
 void pl9_FreeProgram(PL9Program *prog);
 
 #ifdef __cplusplus

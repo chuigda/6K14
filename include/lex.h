@@ -66,6 +66,14 @@ typedef struct {
     const char *valend;
 } PL9Token;
 
+typedef struct stPL9Lexer PL9Lexer;
+
+PL9Lexer *pl9_MakeLexer(char const *fname, char const *src);
+void pl9_FreeLexer(PL9Lexer *lex);
+
+PL9Token pl9_NextToken(PL9Lexer *lex);
+PL9Token pl9_PeekToken(PL9Lexer *lex);
+
 #ifdef __cplusplus
 }; /* extern "C" */
 #endif
