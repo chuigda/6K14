@@ -1,6 +1,8 @@
 #ifndef P6K14_LEX_H
 #define P6K14_LEX_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +32,7 @@ typedef enum {
     PL9_TK_RParen    = 19,
     PL9_TK_Arrow     = 20,
     PL9_TK_Comma     = 21,
-    PL9_TK_Lambda    = 22,
+    PL9_TK_Backslash = 22,
     PL9_TK_DColon    = 23,
     PL9_TK_Eq        = 24,
     PL9_TK_ColonEq   = 25,
@@ -53,15 +55,16 @@ typedef enum {
     PL9_TK_Float     = 41,
     PL9_TK_Char      = 42,
     PL9_TK_String    = 43,
+    PL9_TK_Ident     = 44,
 
-    PL9_TK_EOF       = 44,
+    PL9_TK_EOI       = 45,
     PL9_TK_Absent    = -1
 } PL9TokenKind;
 
 typedef struct {
     PL9TokenKind k;
-    unsigned row;
-    unsigned col;
+    uint32_t row;
+    uint32_t col;
     const char *valbeg;
     const char *valend;
 } PL9Token;
