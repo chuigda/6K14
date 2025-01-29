@@ -207,3 +207,107 @@ static PL9Token TokeniseString(PL9Lexer *lex) {
 static bool IsIdentChar(char c) {
     return isalnum(c) || c == '_' || c == '-';
 }
+
+static PL9Token TokeniseSym(PL9Lexer *lex) {
+    const char *beg = lex->cursor;
+    uint32_t row = lex->line;
+    uint32_t col = lex->col;
+
+    switch (*lex->cursor) {
+        case '(':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_LParen, row, col, beg, lex->cursor };
+        case ')':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_RParen, row, col, beg, lex->cursor };
+        case ',':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Comma, row, col, beg, lex->cursor };
+        case '\\':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Backslash, row, col, beg, lex->cursor };
+        case ':':
+            if (lex->cursor[1] == '=') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_ColonEq, row, col, beg, lex->cursor };
+            } else {
+                lex->cursor++;
+                lex->col++;
+                return (PL9Token) { PL9_TK_DColon, row, col, beg, lex->cursor };
+            }
+        case '=':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Eq, row, col, beg, lex->cursor };
+        case '<':
+            if (lex->cursor[1] == '=') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_LtEq, row, col, beg, lex->cursor };
+            } else if (lex->cursor[1] == '>') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_NEq, row, col, beg, lex->cursor };
+            } else {
+                lex->cursor++;
+                lex->col++;
+                return (PL9Token) { PL9_TK_Lt, row, col, beg, lex->cursor };
+            }
+        case '>':
+            if (lex->cursor[1] == '=') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_GtEq, row, col, beg, lex->cursor };
+            } else {
+                lex->cursor++;
+                lex->col++;
+                return (PL9Token) { PL9_TK_Gt, row, col, beg, lex->cursor };
+            }
+        case '+':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Plus, row, col, beg, lex->cursor };
+        case '-':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Minus, row, col, beg, lex->cursor };
+        case '*':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Mul, row, col, beg, lex->cursor };
+        case '/':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Div, row, col, beg, lex->cursor };
+        case '%':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Mod, row, col, beg, lex->cursor };
+        case '~':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Tilde, row, col, beg, lex->cursor };
+        case '!':
+            if (lex->cursor[1] == '=') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_NEq, row, col, beg, lex->cursor };
+            } else {
+                lex->cursor++;
+                lex->col++;
+                return (PL9Token) { PL9_TK_Exclaim, row, col, beg, lex->cursor };
+            }
+        case ';':
+            lex->cursor++;
+            lex->col++;
+            return (PL9Token) { PL9_TK_Semicolon, row, col, beg, lex->cursor };
+        default:
+            return (PL9Token) { PL9_TK_Absent };
+    }
+}
+
