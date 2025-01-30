@@ -61,6 +61,8 @@ typedef enum {
     PL9_TK_Absent    = -1
 } PL9TokenKind;
 
+const char *pl9_ExplainTokenKind(PL9TokenKind k);
+
 typedef struct {
     PL9TokenKind k;
     uint32_t row;

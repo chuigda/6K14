@@ -5,6 +5,67 @@
 #include <stdlib.h>
 #include <string.h>
 
+const char *pl9_ExplainTokenKind(PL9TokenKind k) {
+    static const char* const names[] = {
+        "Let",
+        "Native",
+        "Rec",
+        "In",
+        "If",
+        "Then",
+        "Else",
+        "Loop",
+        "Break",
+        "Continue",
+        "Return",
+
+        "And",
+        "Or",
+        "Not",
+        "Is",
+        "True",
+        "False",
+        "Nil",
+
+        "LParen",
+        "RParen",
+        "Arrow",
+        "Comma",
+        "Backslash",
+        "DColon",
+        "Eq",
+        "ColonEq",
+        "Lt",
+        "Gt",
+        "LtEq",
+        "GtEq",
+        "DEq",
+        "NEq",
+        "Plus",
+        "Minus",
+        "Mul",
+        "Div",
+        "Mod",
+        "Tilde",
+        "Exclaim",
+        "Semicolon",
+
+        "Int",
+        "Float",
+        "Char",
+        "String",
+        "Ident",
+
+        "EOI"
+    };
+
+    if (k == -1) {
+        return "Absent";
+    }
+
+    return names[k];
+}
+
 struct stPL9Lexer {
     char const *fname;
     char const *src;

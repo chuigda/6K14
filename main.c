@@ -1,5 +1,5 @@
-#include "lex.h"
 #include <stdio.h>
+#include "lex.h"
 
 static char const src[] =
     "let native print :: String -> ()\n"
@@ -18,7 +18,12 @@ int main() {
 
     do {
         tok = pl9_NextToken(lexer);
-        printf("Token: %d, content: %.*s\n", tok.k, (int)(tok.valend - tok.valbeg), tok.valbeg);
+        printf(
+            "Token: %s, content: %.*s\n",
+            pl9_ExplainTokenKind(tok.k),
+            (int)(tok.valend - tok.valbeg),
+            tok.valbeg
+        );
     } while (tok.k != PL9_TK_EOI && tok.k != PL9_TK_Absent);
 
     if (tok.k == PL9_TK_Absent) {
