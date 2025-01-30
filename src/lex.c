@@ -48,6 +48,13 @@ PL9Token pl9_NextToken(PL9Lexer *lex) {
     }
 }
 
+PL9Token pl9_PeekToken(PL9Lexer *lex) {
+    if (lex->peek.k == PL9_TK_Absent) {
+        lex->peek = pl9_NextToken(lex);
+    }
+    return lex->peek;
+}
+
 static bool MaybeSkipWhitespace(PL9Lexer *lex) {
     bool skipped = false;
     while (isspace(*lex->cursor)) {
