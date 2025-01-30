@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct stPL9Lexer {
@@ -24,6 +25,23 @@ static PL9Token TokeniseIdent(PL9Lexer *lex);
 static PL9Token TokeniseString(PL9Lexer *lex);
 static PL9Token TokeniseSym(PL9Lexer *lex);
 
+PL9Lexer *pl9_MakeLexer(char const *fname, char const *src) {
+    PL9Lexer *ret = malloc(sizeof(PL9Lexer));
+    ret->fname = fname;
+    ret->src = src;
+
+    ret->cursor = src;
+    ret->line = 1;
+    ret->col = 1;
+
+    ret->peek.k = PL9_TK_Absent;
+    return ret;
+}
+
+void pl9_FreeLexer(PL9Lexer *lex) {
+    free(lex);
+}
+
 PL9Token pl9_NextToken(PL9Lexer *lex) {
     if (lex->peek.k != PL9_TK_Absent) {
         PL9Token ret = lex->peek;
@@ -34,7 +52,7 @@ PL9Token pl9_NextToken(PL9Lexer *lex) {
     while (MaybeSkipWhitespace(lex) || MaybeSkipComment(lex)) {;}
 
     if (*lex->cursor == '\0') {
-        return (PL9Token) { PL9_TK_EOI };
+        return (PL9Token) { PL9_TK_EOI, 0, 0, NULL, NULL };
     }
 
     if (isdigit(*lex->cursor)) {
@@ -193,7 +211,7 @@ static PL9Token TokeniseString(PL9Lexer *lex) {
 
     while (*lex->cursor != '"') {
         if (*lex->cursor == '\0') {
-            return (PL9Token) { PL9_TK_Absent };
+            return (PL9Token) { PL9_TK_Absent, 0, 0, NULL, NULL };
         }
 
         if (*lex->cursor == '\n') {
@@ -242,6 +260,10 @@ static PL9Token TokeniseSym(PL9Lexer *lex) {
                 lex->cursor += 2;
                 lex->col += 2;
                 return (PL9Token) { PL9_TK_ColonEq, row, col, beg, lex->cursor };
+            } else if (lex->cursor[1] == ':') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_DColon, row, col, beg, lex->cursor };
             } else {
                 lex->cursor++;
                 lex->col++;
@@ -280,9 +302,15 @@ static PL9Token TokeniseSym(PL9Lexer *lex) {
             lex->col++;
             return (PL9Token) { PL9_TK_Plus, row, col, beg, lex->cursor };
         case '-':
-            lex->cursor++;
-            lex->col++;
-            return (PL9Token) { PL9_TK_Minus, row, col, beg, lex->cursor };
+            if (lex->cursor[1] == '>') {
+                lex->cursor += 2;
+                lex->col += 2;
+                return (PL9Token) { PL9_TK_Arrow, row, col, beg, lex->cursor };
+            } else {
+                lex->cursor++;
+                lex->col++;
+                return (PL9Token) { PL9_TK_Minus, row, col, beg, lex->cursor };
+            }
         case '*':
             lex->cursor++;
             lex->col++;
@@ -314,7 +342,7 @@ static PL9Token TokeniseSym(PL9Lexer *lex) {
             lex->col++;
             return (PL9Token) { PL9_TK_Semicolon, row, col, beg, lex->cursor };
         default:
-            return (PL9Token) { PL9_TK_Absent };
+            return (PL9Token) { PL9_TK_Absent, 0, 0, NULL, NULL };
     }
 }
 
