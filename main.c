@@ -2,9 +2,9 @@
 #include "lex.h"
 
 static char const src[] =
-    "let native print :: String -> ()\n"
+    "let native print :: a -> ()\n"
     "let fib :: (Int) -> Int\n"
-    "let fib =\\n -> \n"
+    "let fib = \\n -> \n"
     "    if n < 2 then\n"
     "        n\n"
     "    else\n"
